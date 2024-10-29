@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+
+  web:
+
+    build: .
+
+    ports:
+      - "8080:80"  # Maps port 8080 on your host to port 80 in the container
+      
+    volumes:
+      - .:/var/www/html  # Mounts the current directory to /var/www/html in the container
