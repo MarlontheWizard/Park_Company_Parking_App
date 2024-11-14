@@ -1,5 +1,7 @@
 #Park_Company_Parking_App
 
+![Park_App_Logo_Cropped](https://github.com/user-attachments/assets/9a3d2f56-7744-4700-aa2b-edb7676e8939)
+
 Docker Container Setup
 ----------------------
 Assuming Docker Desktop and the necessary CMD package is installed on your machine, fetch and pull the repo. 
