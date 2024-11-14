@@ -1,11 +1,27 @@
+version: '3'
+
 services:
-
   web:
-
     build: .
-
     ports:
-      - "8080:80"  # Maps port 8080 on your host to port 80 in the container
-      
+      - "8080:80"  #Use port 8080
     volumes:
-      - .:/var/www/html  # Mounts the current directory to /var/www/html in the container
+      - .:/var/www/html  #Mount CWD to /var/www/html in the container so that changes are reflected
+      
+    environment:
+      - PHP_DATE_TIMEZONE=UTC #Example of setting timezone, customize as needed
+    depends_on:
+      - db      #Database should be up and running before the server
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: sudo
+      MYSQL_DATABASE: park_app_database
+      MYSQL_USER: db_user # MySQL user for authentication
+      MYSQL_PASSWORD: dbpassword  # Password for the MySQL user
+    ports:
+      - "3306:3306"
+    volumes:
+      - park_app_mysql-data:/var/lib/mysql  # Persist MySQL data in a named volume
+volumes:
+  park_app_mysql-data:  #Defines volume for MySQL data persistence

@@ -1,39 +1,41 @@
-#Install PHP & Apache into Container
-FROM php:7.4-apache                     
+# Install PHP & Apache into the Container
+FROM php:8.0-apache
 
-#Run apt-get command to install necessary PHP libraries
-#These libraries are native to PHP (e.g mysqli, unzip, libzip-dev)
-RUN apt-get update && apt-get install -y \              
+# Install necessary PHP libraries
+RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libzip-dev \
     && docker-php-ext-install mysqli pdo pdo_mysql zip
 
+# Configure Git to trust the /var/www/html directory
+RUN git config --global --add safe.directory /var/www/html
 
-#The rewrite mod in Apache cleans the URL's of our pages so that they are simple 
+
+# Enable Apache rewrite module
 RUN a2enmod rewrite
 
-#Set the name of the server to suppress Apache warning in Docker Container log
-#We are modifying the Apache configuration file 
-RUN echo "Park_App_Server" >> /etc/apache2/apache2.conf
+# Set the name of the server to suppress Apache warning in logs
+RUN echo "ServerName Park_App_Server" >> /etc/apache2/apache2.conf
 
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-#Copy Composer from the official Composer image
-#We need the composer to manage/install dependencies 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-#Set the working directory of the Docker Container 
-#Local host environment is mounted below to Docker Container, go to Files in Docker Desktop or CMD
+# Set the working directory inside the Docker container
 WORKDIR /var/www/html
 
-#Copy composer.json and composer.lock 
-COPY composer.json composer.lock ./ 
+RUN chown -R www-data:www-data /var/www/html
 
-#Install dependencies to container
-RUN composer install
+RUN chmod -R 755 /var/www/html
 
-#Mount the rest of the application files
+# Copy the composer.json and composer.lock files
+COPY composer.json ./
+
+# Copy the rest of the application files
 COPY . .
 
+# Install Composer dependencies
+RUN composer install --verbose
 
+# Expose the port
 EXPOSE 80

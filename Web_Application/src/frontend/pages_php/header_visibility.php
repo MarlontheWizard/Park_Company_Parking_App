@@ -1,0 +1,32 @@
+<?php
+
+session_start();
+
+// Check if the user is logged in
+if (isset($_SESSION['user'])) {
+    $userLoggedIn = true;
+    $profilePicture = $_SESSION['user']['picture'];  // Assuming the profile picture is stored in session
+} else {
+    $userLoggedIn = false;
+    $profilePicture = null;
+}
+?>
+
+<link rel="stylesheet" href="../pages_css/style.css">
+<header class="header">
+    <nav class="navbar">
+        <a href="index.php">Home</a>
+        <a href="search.php">Find Parking</a>
+        <a href="payment.php">Payment</a>
+        <!-- Show Register and Login links if user is not logged in -->
+        <?php if (!$userLoggedIn): ?>
+            <a href="registration.php">Register</a>
+            <a href="login.php">Login</a>
+        <?php else: ?>
+            <!-- If logged in, show the profile image that links to the dashboard -->
+            <a href="../pages_php/dashboard.php">
+                <img src="<?= $profilePicture; ?>" alt="Profile" class="profile-icon">
+            </a>
+        <?php endif; ?>
+    </nav>
+</header>

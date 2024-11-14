@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Park Finder - Search</title>
+    <link rel="stylesheet" href="../pages_css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Search for Parking</h1>
+    </header>
+
+    <main>
+        <form class="search-form" id="search-form">
+            <label for="location">Location:</label>
+            <input type="text" id="location" placeholder="Enter city or ZIP code">
+
+            <label for="time">Time Duration:</label>
+            <input type="number" id="time" placeholder="Hours">
+
+            <label for="vehicle">Vehicle Type:</label>
+            <select id="vehicle">
+                <option value="car">Car</option>
+                <option value="motorcycle">Motorcycle</option>
+                <option value="truck">Truck</option>
+            </select>
+
+            <button type="submit" class="button">Find Parking</button>
+        </form>
+
+        <section class="map-section">
+            <h2>Map View</h2>
+            <div id="map" style="height: 400px; width: 100%;"></div>
+        </section>
+
+        <!-- Parking Spots List -->
+        <section class="parking-list">
+            <h2>Parking Spots</h2>
+            <ul id="parking-list">
+                <!-- List of parking spots will be populated here -->
+            </ul>
+        </section>
+
+        <!-- Reservation Form -->
+        <section id="reservation-form" style="display:none;">
+            <h2>Book Parking Spot</h2>
+            <form id="reservationDetailsForm">
+                <input type="hidden" id="parkingSpotId">
+                <label for="reservationTime">Select Time and Date:</label>
+                <input type="datetime-local" id="reservationTime" required>
+                <button type="submit" class="button">Proceed to Payment</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        let map;
+        let service;
+        let markers = [];
+
+        // Initialize the map
+        function initMap() {
+            const centerLocation = { lat: 39.9526, lng: -75.1652 }; // Default: Philadelphia
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: centerLocation,
+                zoom: 12
+            });
+        }
+
+        // Add the Google Maps script dynamically
+        function loadGoogleMapsAPI() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDFbLw6QN-OI-1VkXz5GZ3wGstAgCC4hA4&libraries=places&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+
+        // Call this to initialize the API when the page loads
+        window.onload = loadGoogleMapsAPI;
+
+        // Handle the search form submission
+        document.getElementById('search-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            findParking();
+        });
+
+        // Function to find parking
+        function findParking() {
+            const location = document.getElementById('location').value;
+            if (!location) {
+                alert("Please enter a location.");
+                return;
+            }
+
+            // Clear previous results
+            document.getElementById('parking-list').innerHTML = '';
+            clearMarkers();
+
+            // Geocode location input to get coordinates
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: location }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    // Center map on the first result
+                    map.setCenter(results[0].geometry.location);
+
+                    // Use the Places API to find nearby parking spots
+                    const request = {
+                        location: results[0].geometry.location,
+                        radius: 2000, // Search within 2 km
+                        type: ['parking']
+                    };
+
+                    // Instantiate the Places service and call the nearby search
+                    service = new google.maps.places.PlacesService(map);
+                    service.nearbySearch(request, displayResults);
+                } else {
+                    alert("Could not find location: " + status);
+                }
+            });
+        }
+
+        // Function to display results
+        function displayResults(results, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                results.forEach((place) => {
+                    // Create a marker for each parking spot
+                    const marker = new google.maps.Marker({
+                        map: map,
+                        position: place.geometry.location,
+                        title: place.name
+                    });
+                    markers.push(marker);
+
+                    // Fetch the parking spot photo (if available)
+                    const photoUrl = place.photos ? place.photos[0].getUrl({ maxWidth: 100, maxHeight: 100 }) : '';
+
+                    // Create a list item for each parking spot
+                    const listItem = document.createElement('li');
+                    let bookNowButton = `<button class="button" onclick="selectReservation('${place.place_id}', '${place.name}')">Book Now</button>`;
+
+                    listItem.innerHTML = `
+                        <div class="parking-item">
+                            ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}">` : ''}
+                            <strong>${place.name}</strong><br>
+                            ${place.vicinity}<br>
+                            Rating: ${place.rating || 'N/A'}<br>
+                            ${bookNowButton}
+                        </div>
+                    `;
+                    document.getElementById('parking-list').appendChild(listItem);
+                });
+            } else {
+                alert("No parking spots found nearby.");
+            }
+        }
+
+        // Function to show the reservation form and store the selected parking spot
+        function selectReservation(placeId, name) {
+            // Store the selected parking spot's place ID and name
+            document.getElementById('parkingSpotId').value = placeId;
+            document.getElementById('reservation-form').style.display = 'block'; // Show reservation form
+            document.getElementById('parking-list').style.display = 'none'; // Hide the parking list
+        }
+
+        // Handle reservation form submission
+        document.getElementById('reservationDetailsForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            const reservationTime = document.getElementById('reservationTime').value;
+            const parkingSpotId = document.getElementById('parkingSpotId').value;
+
+            if (!reservationTime) {
+                alert("Please select a time for the reservation.");
+                return;
+            }
+
+            // Send reservation data to the backend to create the Stripe session
+            fetch('http://localhost:8080/web_application/src/backend/payment/create-checkout-session.php', {
+                method: 'POST',
+                headers: {
+                    
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ spotId: parkingSpotId, reservationTime: reservationTime })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to communicate with the backend');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Check if backend response contains the checkoutUrl
+                if (data.checkoutUrl) {
+                    // Redirect to the Stripe Checkout page
+                    window.location.href = data.checkoutUrl;
+                } else {
+                    alert('Error creating payment session');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing your payment');
+            });
+        });
+
+        // Clear markers from the map
+        function clearMarkers() {
+            markers.forEach(marker => {
+                marker.setMap(null);
+            });
+            markers = [];
+        }
+    </script>
+</body>
+</html>

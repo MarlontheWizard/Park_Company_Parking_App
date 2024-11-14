@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Dashboard</title>
+    <link rel="stylesheet" href="../pages_css/dashboard.css"> <!-- Your custom CSS file -->
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="profile-card">
+            <h1>Welcome to your Dashboard!</h1>
+            
+            <!-- Output google account's image -->
+            <div class="profile-image">
+                <img src="<?= $_SESSION['user']['picture']; ?>" alt="Profile Image" class="profile-img">
+            </div>
+            
+            <!-- Display name, email, and language -->
+            <div class="profile-info">
+                <p><strong>Name:</strong> <?= htmlspecialchars($_SESSION['user']['name']); ?></p>
+                <p><strong>Email:</strong> <?= htmlspecialchars($_SESSION['user']['email']); ?></p>
+                <p><strong>Language:</strong> <?= htmlspecialchars($_SESSION['user']['locale']); ?></p>
+            </div>
+            
+            <!-- Log Out Button -->
+            <a href="../pages_php/logout.php" class="logout-button">Log Out</a>
+            
+            <!-- Delete Account Button -->
+            <form id="delete-form" action="delete_account.php" method="POST" style="display:none;">
+                <button type="submit" class="cancel-button">Confirm Delete</button>
+            </form>
+            
+            <button id="delete-button" class="delete-button">Delete Account</button>
+            
+            <!-- Warning Message -->
+            <div id="warning-message" style="display:none;">
+                <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+                <button id="confirm-delete" class="delete-button">Yes, Delete My Account</button>
+                <button id="cancel-delete" class="cancel-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to elements
+        const deleteButton = document.getElementById('delete-button');
+        const warningMessage = document.getElementById('warning-message');
+        const confirmDeleteButton = document.getElementById('confirm-delete');
+        const cancelDeleteButton = document.getElementById('cancel-delete');
+        const deleteForm = document.getElementById('delete-form');
+
+        // Show the warning message when the delete button is clicked
+        deleteButton.addEventListener('click', function() {
+            warningMessage.style.display = 'block';
+            deleteButton.style.display = 'none';
+        });
+
+        // Confirm the deletion and submit the form
+        confirmDeleteButton.addEventListener('click', function() {
+            deleteForm.submit(); // Submit the form to delete the account
+        });
+
+        // Cancel the deletion and hide the warning message
+        cancelDeleteButton.addEventListener('click', function() {
+            warningMessage.style.display = 'none';
+            deleteButton.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

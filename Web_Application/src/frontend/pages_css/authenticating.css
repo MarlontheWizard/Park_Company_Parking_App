@@ -1,0 +1,108 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Set body background and font styles */
+body {
+    background-color: #f4f6f9;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Main authentication container */
+.auth-container {
+    background-color: #fff;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 450px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Header style */
+.auth-content header {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Loading dots animation */
+.loading-dots {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: inline-block;
+    color: #4285F4;
+    animation: loading 1.5s infinite;
+}
+
+.loading-dots span {
+    opacity: 0;
+    animation: dot 1.5s infinite;
+}
+
+.loading-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes loading {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+    25%, 75% {
+        opacity: 0;
+    }
+}
+
+@keyframes dot {
+    0% {
+        opacity: 0;
+    }
+    33% {
+        opacity: 1;
+    }
+    66% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Authentication instructions/info */
+.auth-info {
+    margin-top: 15px;
+    color: #555;
+    font-size: 14px;
+}
+
+/* Make the page responsive */
+@media (max-width: 500px) {
+    .auth-container {
+        padding: 20px;
+    }
+
+    .loading-dots {
+        font-size: 25px;
+    }
+
+    .auth-content header {
+        font-size: 20px;
+    }
+}
