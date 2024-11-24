@@ -15,24 +15,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Open database connection using openConn() from handle_connection.php
+
     $mysqli = OpenConn();
-    
-    // Query to check if the user exists with the given email
-    $sql = "SELECT * FROM users WHERE email = ?";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+
     
     // Check if the email exists in the database
-    if ($result->num_rows > 0) {
+    if (userExists($mysqli, $email)) {
+        
         $user = $result->fetch_object();
         
         // Verify the password
         if (password_verify($password, $user->password)) {
             // Password is correct, log the user in
             $_SESSION['user'] = (object)[
+                
+                'id' => $user->id,
                 'email' => $user->email,
                 'name' => $user->name,
                 'picture' => $user->picture,
@@ -42,8 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Redirect to dashboard after successful login
             header('Location: dashboard.php');
             exit();
-        } else {
-            // Invalid password
+
+        } 
+        
+        else {
+        
             $error_message = "Incorrect password. Please try again.";
         }
     } 

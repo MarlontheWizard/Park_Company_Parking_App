@@ -3,21 +3,28 @@
 session_start();
 
 // Check if the user is logged in
-if (isset($_SESSION['user'])) {
+if(isset($_SESSION['user'])) {
+    
     $userLoggedIn = true;
-    $profilePicture = $_SESSION['user']['picture'];  // Assuming the profile picture is stored in session
-} else {
+    $profilePicture = $_SESSION['user']['picture'];  // Get picture stored in session 
+} 
+
+else {
+    
     $userLoggedIn = false;
     $profilePicture = null;
 }
 ?>
 
+
+<!-- This is the html that will only show for a logged in user. Only the header is modified for now.-->
 <link rel="stylesheet" href="../pages_css/style.css">
 <header class="header">
     <nav class="navbar">
         <a href="index.php">Home</a>
         <a href="search.php">Find Parking</a>
         <a href="payment.php">Payment</a>
+        
         <!-- Show Register and Login links if user is not logged in -->
         <?php if (!$userLoggedIn): ?>
             <a href="registration.php">Register</a>

@@ -12,33 +12,19 @@ $endpoint_secret = 'whsec_8e829a229df7516ee33964148cecb905c49d9d41fc983c792f7890
 error_log("Webhook accessed.");
 
 try {
+    
     $event = \Stripe\Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
 
     // Inside the `checkout.session.completed` event handler
-if ($event->type == 'checkout.session.completed') {
-    $session = $event->data->object;
-    $reservationId = $session->metadata->reservation_id;
-
-    $mysqli = OpenConn();
-
-    if ($mysqli) {
-        $stmt = $mysqli->prepare("UPDATE reservations SET status = 'paid' WHERE id = ?");
-        $stmt->bind_param("i", $reservationId);
-
-        if ($stmt->execute()) {
-            error_log("Reservation ID $reservationId marked as paid.");
-        } else {
-            error_log("Database update failed for Reservation ID $reservationId: " . $mysqli->error);
-        }
-        $stmt->close();
-        CloseConn($mysqli);
-    } else {
-        error_log("Database connection failed: " . mysqli_connect_error());
+    if ($event->type == 'checkout.session.completed') {
+        $session = $event->data->object;
     }
-}
 
     http_response_code(200); // Return a response to acknowledge receipt of the event
-} catch (Exception $e) {
+} 
+
+catch (Exception $e) {
+    
     http_response_code(400); // Bad Request
     exit();
 }

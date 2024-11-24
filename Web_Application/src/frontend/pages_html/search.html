@@ -166,6 +166,7 @@
 
         // Handle reservation form submission
         document.getElementById('reservationDetailsForm').addEventListener('submit', function(event) {
+            
             event.preventDefault(); // Prevent the form from submitting normally
 
             const reservationTime = document.getElementById('reservationTime').value;
@@ -180,7 +181,6 @@
             fetch('http://localhost:8080/web_application/src/backend/payment/create-checkout-session.php', {
                 method: 'POST',
                 headers: {
-                    
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ spotId: parkingSpotId, reservationTime: reservationTime })
@@ -189,7 +189,9 @@
                 if (!response.ok) {
                     throw new Error('Failed to communicate with the backend');
                 }
+
                 return response.json();
+                
             })
             .then(data => {
                 // Check if backend response contains the checkoutUrl
@@ -200,7 +202,7 @@
                     alert('Error creating payment session');
                 }
             })
-            .catch(error => {
+            .catch(error =>{
                 console.error('Error:', error);
                 alert('An error occurred while processing your payment');
             });

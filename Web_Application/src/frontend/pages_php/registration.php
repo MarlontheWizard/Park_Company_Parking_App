@@ -6,32 +6,33 @@ require_once '/var/www/html/web_application/src/backend/database/handle_connecti
 $error_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+   
     // Get form inputs
     $email = $_POST['email'];
     $name = $_POST['name'];
     $password = $_POST['password'];
 
+    // Import default profile image
     $default_picture = '../images/default_user_photo.jpg'; // Replace with your default image URL or path
 
     // If the user has uploaded a picture, use it; otherwise, use the default picture
     $user_picture = isset($_POST['picture']) && !empty($_POST['picture']) ? $_POST['picture'] : $default_picture;
 
     try {
-        // Open database connection
+        
+
         $mysqli = OpenConn();
         
 
-        // Check if email already exists
-        $sql = "SELECT * FROM users WHERE email = ?";
-        $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
+        // Check if email already exists...
+        if (userExists($mysqli, $email)) {
+            
             $error_message = "Email already exists. Please use a different email.";
-        } else {
-            // Hash the password
+        } 
+        
+        else {
+            
+            // Hash 
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
             // Insert new user
@@ -55,7 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header('Location: dashboard.php');
             exit();
         }
-    } catch (Exception $e) {
+        
+    } 
+    
+    catch (Exception $e) {
+        
         // If an exception occurs, log it and set an error message
         error_log($e->getMessage());
         $error_message = "There was an error processing your registration. Please try again.";
