@@ -11,9 +11,12 @@ RUN apt-get update && apt-get install -y \
 # Configure Git to trust the /var/www/html directory
 RUN git config --global --add safe.directory /var/www/html
 
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/Web_Application/src/pages
 
 # Enable Apache rewrite module
 RUN a2enmod rewrite
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Set the name of the server to suppress Apache warning in logs
 RUN echo "ServerName Park_App_Server" >> /etc/apache2/apache2.conf
@@ -35,7 +38,7 @@ COPY composer.json ./
 COPY . .
 
 # Install Composer dependencies
-RUN composer install --verbose
+RUN composer install --no-dev --optimize-autoloader --verbose
 
 # Expose the port
 EXPOSE 80

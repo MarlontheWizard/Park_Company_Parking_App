@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: park-company-parking-app
+    env: docker
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /

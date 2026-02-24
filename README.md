@@ -30,3 +30,17 @@ google/apiclient  -> Google API Client Library for PHP -> Enables Google Authent
 vlucas/phpdotenv -> PHP dotenv is a library to load environment variables from a .env file -> Facilitates the management of sensitive information such as API keys and credentials without hardcoding them in the codebase. 
 
 phpunit/phpunit -> A unit testing framework for PHP -> Provides tools for writing and running unit tests to ensure code quality and functionality. This is just in case for QA. |
+
+Deployment (Render)
+-------------------
+This repository includes a Render blueprint file `render.yaml` for Docker-based deployment.
+
+Steps:
+1. Fork this repository to your GitHub account.
+2. In Render, choose **New +** -> **Blueprint** and connect your fork.
+3. Select this repository and deploy.
+4. Render will build using `Dockerfile` and expose the app at `/`.
+
+Notes:
+- Apache document root is configured to `Web_Application/src/pages` for production.
+- If your app needs API keys or credentials, configure them in Render environment variables.
