@@ -3,10 +3,19 @@ setlocal
 
 cd /d "%~dp0"
 
+if exist "C:\Program Files\Docker\Docker\resources\bin\docker.exe" (
+  set "PATH=C:\Program Files\Docker\Docker\resources\bin;%PATH%"
+)
+
+if exist "C:\ProgramData\DockerDesktop\version-bin\docker.exe" (
+  set "PATH=C:\ProgramData\DockerDesktop\version-bin;%PATH%"
+)
+
 echo [1/4] Checking Docker availability...
 where docker >nul 2>&1
 if errorlevel 1 (
   echo Docker is not installed or not in PATH.
+  echo Please install Docker Desktop and restart terminal.
   exit /b 1
 )
 
@@ -17,7 +26,7 @@ if errorlevel 1 (
 )
 
 echo [2/4] Starting application containers...
-docker-compose up --build -d
+docker compose up --build -d
 if errorlevel 1 (
   echo Failed to start containers.
   exit /b 1
