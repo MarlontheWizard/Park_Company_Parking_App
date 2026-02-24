@@ -13,7 +13,7 @@ Step #1: Type and enter the following command --> docker-compose up --build
          When finished, check the desktop app to view the container visually. Here you'll find the log and files for the container. 
          
 Step #2: Click on the port link (it is blue and underlined) under the container name to visit page on internet. If it says Forbidden it is because
-         we have not set the PHP for our homepage yet. To test and ensure our server is working, go to http://localhost:8080/Web_Application/src/pages/index.php 
+         we have not set the PHP for our homepage yet. To test and ensure our server is working, go to http://localhost:8080/index.php 
          **Notice the structure of the URL, follow this structure to load the other pages**
 
 [Optional] Step #3: To open container in the terminal, make sure that the container is running and enter -> docker ps 
@@ -53,7 +53,7 @@ Use this quick sequence before sharing a demo link.
     - `demo-start.bat`
     - or `docker-compose up --build -d`
 2. Verify local app works:
-    - `http://localhost:8080/Web_Application/src/pages/index.php`
+    - `http://localhost:8080/index.php`
 3. (Optional) Expose to public internet for temporary live demo:
     - `cloudflared tunnel --url http://localhost:8080`
     - or `ngrok http 8080`

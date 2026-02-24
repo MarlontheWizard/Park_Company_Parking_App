@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 # Configure Git to trust the /var/www/html directory
 RUN git config --global --add safe.directory /var/www/html
 
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/Web_Application/src/pages
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/Web_Application/src/frontend/pages_php
 
 # Enable Apache rewrite module
 RUN a2enmod rewrite

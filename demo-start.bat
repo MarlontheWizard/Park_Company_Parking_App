@@ -33,10 +33,10 @@ if errorlevel 1 (
 )
 
 echo [3/4] App should be available at:
-echo     http://localhost:8080/Web_Application/src/pages/index.php
+echo     http://localhost:8080/index.php
 
 echo [4/4] Opening app in browser...
-start "" "http://localhost:8080/Web_Application/src/pages/index.php"
+start "" "http://localhost:8080/index.php"
 
 echo.
 echo Optional temporary public demo URL:
