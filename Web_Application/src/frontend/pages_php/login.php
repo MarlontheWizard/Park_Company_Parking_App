@@ -4,7 +4,7 @@ session_start();
 require_once '/var/www/html/vendor/autoload.php'; 
 
 
-require_once '/var/www/html/web_application/src/backend/database/handle_connection.php';
+require_once '/var/www/html/Web_Application/src/backend/database/handle_connection.php';
 
 // Initialize variables for error message
 $error_message = '';
@@ -21,19 +21,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // Check if the email exists in the database
     if (userExists($mysqli, $email)) {
-        
-        $user = $result->fetch_object();
+        $user = getUserByEmail($mysqli, $email);
+        if (!$user) {
+            $error_message = "No account found with this email. Please check your email or sign up.";
+            CloseConn($mysqli);
+            include '../pages_html/login.html';
+            exit();
+        }
         
         // Verify the password
-        if (password_verify($password, $user->password)) {
+        if (isset($user['password']) && password_verify($password, $user['password'])) {
             // Password is correct, log the user in
             $_SESSION['user'] = (object)[
                 
-                'id' => $user->id,
-                'email' => $user->email,
-                'name' => $user->name,
-                'picture' => $user->picture,
-                'locale' => $user->locale
+                'id' => $user['user_id'],
+                'email' => $user['email'],
+                'name' => $user['name'],
+                'picture' => $user['picture'],
+                'locale' => $user['locale']
             ];
             
             // Redirect to dashboard after successful login

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '/var/www/html/web_application/src/backend/database/handle_connection.php';
+require_once '/var/www/html/Web_Application/src/backend/database/handle_connection.php';
 
 
 $error_message = '';

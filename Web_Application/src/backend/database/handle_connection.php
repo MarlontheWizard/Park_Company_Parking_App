@@ -9,7 +9,55 @@ function OpenConn() {
         die("Connection failed: " . $mysqli->connect_error);
     }
 
+    ensureSchema($mysqli);
+
     return $mysqli; // Return the connection object
+}
+
+function ensureSchema($mysqli) {
+    $usersTableSql = "CREATE TABLE IF NOT EXISTS users (
+        user_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NULL,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        password VARCHAR(255) NULL,
+        locale VARCHAR(50) NULL,
+        picture TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    $reservationsTableSql = "CREATE TABLE IF NOT EXISTS reservations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        spot_id VARCHAR(255) NOT NULL,
+        reservation_time DATETIME NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_reservations_user_id (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    $transactionsTableSql = "CREATE TABLE IF NOT EXISTS transactions (
+        transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        reservation_id INT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        payment_method VARCHAR(50) NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_transactions_user_id (user_id),
+        INDEX idx_transactions_reservation_id (reservation_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    if (!$mysqli->query($usersTableSql)) {
+        throw new Exception("Failed to ensure users table exists: " . $mysqli->error);
+    }
+
+    if (!$mysqli->query($reservationsTableSql)) {
+        throw new Exception("Failed to ensure reservations table exists: " . $mysqli->error);
+    }
+
+    if (!$mysqli->query($transactionsTableSql)) {
+        throw new Exception("Failed to ensure transactions table exists: " . $mysqli->error);
+    }
 }
 
 function CloseConn($mysqli) {
@@ -372,11 +420,34 @@ function userExists($mysqli, $email){
 
     
     $stmt = $mysqli->prepare($sql);
+    if (!$stmt) {
+        throw new Exception("Failed to prepare userExists query: " . $mysqli->error);
+    }
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    return $result->num_rows > 0;
+    $exists = $result->num_rows > 0;
+    $stmt->close();
+
+    return $exists;
+}
+
+function getUserByEmail($mysqli, $email) {
+    $sql = "SELECT user_id, email, name, password, locale, picture FROM users WHERE email = ? LIMIT 1";
+    $stmt = $mysqli->prepare($sql);
+
+    if (!$stmt) {
+        throw new Exception("Failed to prepare getUserByEmail query: " . $mysqli->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    return $user ?: null;
 }
 
 /*
