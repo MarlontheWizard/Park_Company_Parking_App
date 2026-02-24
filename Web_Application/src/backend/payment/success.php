@@ -4,9 +4,27 @@ session_start();  // Start the session
 require_once '/var/www/html/vendor/autoload.php';
 require_once '/var/www/html/web_application/src/backend/database/handle_connection.php';
 
+if (file_exists('/var/www/html/.env')) {
+    Dotenv\Dotenv::createImmutable('/var/www/html')->safeLoad();
+}
+
+$stripeSecretKey = $_ENV['STRIPE_SECRET_KEY'] ?? getenv('STRIPE_SECRET_KEY');
+
+if (!$stripeSecretKey) {
+    http_response_code(500);
+    echo '<h1>Configuration Error</h1><p>Stripe secret key is not configured.</p>';
+    exit();
+}
+
+$googlePlacesApiKey = $_ENV['GOOGLE_PLACES_API_KEY'] ?? getenv('GOOGLE_PLACES_API_KEY');
+
 function getLocationFromPlaceId($placeId) {
+    global $googlePlacesApiKey;
+    if (!$googlePlacesApiKey) {
+        return null;
+    }
     
-    $apiKey = 'AIzaSyDFbLw6QN-OI-1VkXz5GZ3wGstAgCC4hA4'; // Google Places API
+    $apiKey = $googlePlacesApiKey;
 
     $url = "https://maps.googleapis.com/maps/api/place/details/json?key=$apiKey&place_id=$placeId";
 
@@ -29,7 +47,7 @@ function getLocationFromPlaceId($placeId) {
 }
 
 
-\Stripe\Stripe::setApiKey('sk_test_51QKsGKFtWrQJAs7gfdIk8lfixc9tgS7pSDSQkCCRD9EAWtFG96hGZTk3eX91B0kPkBDAj41NGr0karGlzvRiJhkF00ecqW2MjI');
+\Stripe\Stripe::setApiKey($stripeSecretKey);
 
 // Retrieve the session ID from the URL parameters
 $session_id = $_GET['session_id'] ?? null;

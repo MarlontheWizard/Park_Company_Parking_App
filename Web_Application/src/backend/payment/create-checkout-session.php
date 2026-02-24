@@ -7,7 +7,19 @@ header('Content-Type: application/json');
 require_once '/var/www/html/vendor/autoload.php';
 require_once '/var/www/html/web_application/src/backend/database/handle_connection.php';
 
-\Stripe\Stripe::setApiKey('sk_test_51QKsGKFtWrQJAs7gfdIk8lfixc9tgS7pSDSQkCCRD9EAWtFG96hGZTk3eX91B0kPkBDAj41NGr0karGlzvRiJhkF00ecqW2MjI'); // Use your secret Stripe API key here
+if (file_exists('/var/www/html/.env')) {
+    Dotenv\Dotenv::createImmutable('/var/www/html')->safeLoad();
+}
+
+$stripeSecretKey = $_ENV['STRIPE_SECRET_KEY'] ?? getenv('STRIPE_SECRET_KEY');
+
+if (!$stripeSecretKey) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Stripe secret key is not configured']);
+    exit();
+}
+
+\Stripe\Stripe::setApiKey($stripeSecretKey);
 
 // Check if the user is logged in
 if (!isset($_SESSION['user'])) {
