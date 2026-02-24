@@ -44,3 +44,27 @@ Steps:
 Notes:
 - Apache document root is configured to `Web_Application/src/pages` for production.
 - If your app needs API keys or credentials, configure them in Render environment variables.
+
+Demo Checklist (Interview Ready)
+--------------------------------
+Use this quick sequence before sharing a demo link.
+
+1. Start app containers:
+    - `demo-start.bat`
+    - or `docker-compose up --build -d`
+2. Verify local app works:
+    - `http://localhost:8080/Web_Application/src/pages/index.php`
+3. (Optional) Expose to public internet for temporary live demo:
+    - `cloudflared tunnel --url http://localhost:8080`
+    - or `ngrok http 8080`
+4. Validate core flow before interview:
+    - Open landing page
+    - Search/select a parking spot
+    - Start checkout in Stripe test mode
+    - Confirm success page and dashboard redirect
+5. Stop demo services after use:
+    - `demo-stop.bat`
+
+Security reminder:
+- Keep secrets in environment variables (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `GOOGLE_PLACES_API_KEY`).
+- Never commit API keys or webhook secrets to source control.
