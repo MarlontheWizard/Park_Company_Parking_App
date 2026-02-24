@@ -178,7 +178,7 @@
             }
 
             // Send reservation data to the backend to create the Stripe session
-            fetch('http://localhost:8080/web_application/src/backend/payment/create-checkout-session.php', {
+            fetch('/payment/create-checkout-session.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

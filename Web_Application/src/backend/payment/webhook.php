@@ -1,6 +1,6 @@
 <?php
 require_once '/var/www/html/vendor/autoload.php';
-include_once '../database/handle_connection.php';
+include_once '/var/www/html/Web_Application/src/backend/database/handle_connection.php';
 
 if (file_exists('/var/www/html/.env')) {
     Dotenv\Dotenv::createImmutable('/var/www/html')->safeLoad();

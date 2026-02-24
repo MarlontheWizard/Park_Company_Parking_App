@@ -23,7 +23,7 @@ else {
     <nav class="navbar">
         <a href="/pages_php/index.php">Home</a>
         <a href="/pages_php/search.php">Find Parking</a>
-        <a href="/pages_php/search.php">Payment</a>
+        <a href="/pages_php/payment.php">Payment</a>
         
         <!-- Show Register and Login links if user is not logged in -->
         <?php if (!$userLoggedIn): ?>

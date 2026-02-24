@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 
 // Import the autoloader and attributes to handle database state
 require_once '/var/www/html/vendor/autoload.php';
-require_once '/var/www/html/web_application/src/backend/database/handle_connection.php';
+require_once '/var/www/html/Web_Application/src/backend/database/handle_connection.php';
 
 if (file_exists('/var/www/html/.env')) {
     Dotenv\Dotenv::createImmutable('/var/www/html')->safeLoad();
@@ -78,8 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
             ],
             'mode' => 'payment',
-            'success_url' => 'http://localhost:8080/web_application/src/backend/payment/success.php?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => 'http://localhost:8080/web_application/src/frontend/php_pages/index.php',
+            'success_url' => 'http://localhost:8080/payment/success.php?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => 'http://localhost:8080/pages_php/payment.php',
             'metadata' => [
                 'reservation_id' => $reservationId, //Save reservationId for tracking later
                 'parking_spot' => $spotId, // Add parking spot to metadata

@@ -2,7 +2,7 @@
 session_start();  // Start the session
 
 require_once '/var/www/html/vendor/autoload.php';
-require_once '/var/www/html/web_application/src/backend/database/handle_connection.php';
+require_once '/var/www/html/Web_Application/src/backend/database/handle_connection.php';
 
 if (file_exists('/var/www/html/.env')) {
     Dotenv\Dotenv::createImmutable('/var/www/html')->safeLoad();
@@ -107,7 +107,7 @@ if ($session_id) {
                         <meta charset="UTF-8">
                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
                         <title>Payment Successful</title>
-                        <link rel="stylesheet" href="../../frontend/pages_css/style.css">
+                        <link rel="stylesheet" href="/pages_css/style.css">
                         <style>
                             body {
                                 font-family: Arial, sans-serif;
@@ -170,14 +170,14 @@ if ($session_id) {
                         </div>
                     
                         <div>
-                            <a href="../../frontend/pages_php/dashboard.php" class="button">Go to Dashboard</a>
+                            <a href="/pages_php/dashboard.php" class="button">Go to Dashboard</a>
                         </div>
                     
                         <script>
                     
                             // Redirect to the dashboard after 5 seconds
                             setTimeout(function() {
-                                window.location.href = '../../frontend/pages_php/dashboard.php'; // Redirect to the dashboard URL
+                                window.location.href = '/pages_php/dashboard.php'; // Redirect to the dashboard URL
                             }, 10000); // 5 seconds
                         </script>
                     

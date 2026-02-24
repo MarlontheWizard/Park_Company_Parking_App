@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Verify the password
         if (isset($user['password']) && password_verify($password, $user['password'])) {
             // Password is correct, log the user in
-            $_SESSION['user'] = (object)[
+            $_SESSION['user'] = [
                 
                 'id' => $user['user_id'],
                 'email' => $user['email'],
