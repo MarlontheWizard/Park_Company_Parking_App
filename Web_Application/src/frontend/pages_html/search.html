@@ -59,6 +59,7 @@
         let map;
         let service;
         let markers = [];
+        let searchCenter = null;
         const parkingListElement = document.getElementById('parking-list');
         const parkingStatusElement = document.getElementById('parking-status');
         const reservationFormElement = document.getElementById('reservation-form');
@@ -75,7 +76,7 @@
         // Add the Google Maps script dynamically
         function loadGoogleMapsAPI() {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDFbLw6QN-OI-1VkXz5GZ3wGstAgCC4hA4&libraries=places&callback=initMap`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDFbLw6QN-OI-1VkXz5GZ3wGstAgCC4hA4&libraries=places,geometry&callback=initMap`;
             script.async = true;
             script.defer = true;
             document.head.appendChild(script);
@@ -111,6 +112,7 @@
                 if (status === 'OK' && results[0]) {
                     // Center map on the first result
                     map.setCenter(results[0].geometry.location);
+                    searchCenter = results[0].geometry.location;
 
                     // Use the Places API to find nearby parking spots
                     const request = {
@@ -135,9 +137,29 @@
                 return;
             }
 
-            parkingStatusElement.textContent = `Found ${results.length} parking spots.`;
+            const rankedResults = results
+                .filter((place) => place.geometry && place.geometry.location)
+                .map((place) => {
+                    const distanceMeters = searchCenter
+                        ? google.maps.geometry.spherical.computeDistanceBetween(searchCenter, place.geometry.location)
+                        : Number.MAX_SAFE_INTEGER;
 
-            results.forEach((place) => {
+                    return {
+                        place,
+                        distanceMeters
+                    };
+                })
+                .sort((a, b) => a.distanceMeters - b.distanceMeters)
+                .slice(0, 10);
+
+            if (rankedResults.length === 0) {
+                parkingStatusElement.textContent = 'No parking spots found for this location. Try a nearby city or landmark.';
+                return;
+            }
+
+            parkingStatusElement.textContent = `Showing top ${rankedResults.length} closest parking spots.`;
+
+            rankedResults.forEach(({ place, distanceMeters }) => {
                 const marker = new google.maps.Marker({
                     map: map,
                     position: place.geometry.location,
@@ -155,12 +177,25 @@
                         ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}">` : ''}
                         <strong>${place.name}</strong><br>
                         ${place.vicinity || place.formatted_address || 'Address unavailable'}<br>
+                        Distance: ${formatDistance(distanceMeters)}<br>
                         Rating: ${place.rating || 'N/A'}<br>
                         ${bookNowButton}
                     </div>
                 `;
                 parkingListElement.appendChild(listItem);
             });
+        }
+
+        function formatDistance(distanceMeters) {
+            if (!Number.isFinite(distanceMeters)) {
+                return 'N/A';
+            }
+
+            if (distanceMeters < 1000) {
+                return `${Math.round(distanceMeters)} m`;
+            }
+
+            return `${(distanceMeters / 1000).toFixed(2)} km`;
         }
 
         // Function to display results
