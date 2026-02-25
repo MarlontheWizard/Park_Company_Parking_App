@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="/pages_css/style.css">
 </head>
 <body>
-    <header>
-        <h1>Search for Parking</h1>
-    </header>
+    <main class="search-page">
+        <header class="page-header">
+            <h1>Search for Parking</h1>
+            <p class="page-header-sub">Enter a location and we’ll show nearby spots you can book.</p>
+        </header>
 
-    <main>
         <form class="search-form" id="search-form">
             <label for="location">Location:</label>
             <input type="text" id="location" placeholder="Enter city or ZIP code">
@@ -35,7 +36,7 @@
         </section>
 
         <!-- Parking Spots List -->
-        <section class="parking-list">
+        <section class="parking-list" id="parking-list-section">
             <h2>Parking Spots</h2>
             <p id="parking-status"></p>
             <ul id="parking-list">
@@ -43,14 +44,16 @@
             </ul>
         </section>
 
-        <!-- Reservation Form -->
-        <section id="reservation-form" style="display:none;">
-            <h2>Book Parking Spot</h2>
+        <!-- Reservation Form (shown after selecting a spot) -->
+        <section id="reservation-form" class="reservation-form-card" style="display:none;">
+            <h2>Book your spot</h2>
+            <p id="selected-spot-name" class="selected-spot-name"></p>
+            <p class="change-spot-wrap"><a href="#" id="change-spot-link" class="change-spot-link">← Change parking spot</a></p>
             <form id="reservationDetailsForm">
                 <input type="hidden" id="parkingSpotId">
-                <label for="reservationTime">Select Time and Date:</label>
+                <label for="reservationTime">Select date and time</label>
                 <input type="datetime-local" id="reservationTime" required>
-                <button type="submit" class="button">Proceed to Payment</button>
+                <button type="submit" class="button">Proceed to payment</button>
             </form>
         </section>
     </main>
@@ -91,6 +94,41 @@
             findParking();
         });
 
+        // Demo parking spots when Google Places returns nothing or API fails (e.g. key/billing)
+        const DEMO_SPOTS = [
+            { place_id: 'demo_1', name: 'Center City Parking Garage', address: '1234 Market St, Philadelphia, PA', distanceMeters: 250, rating: '4.2' },
+            { place_id: 'demo_2', name: 'Liberty Park & Ride', address: '501 N 9th St, Philadelphia, PA', distanceMeters: 520, rating: '4.0' },
+            { place_id: 'demo_3', name: 'Convention Center Lot', address: '1101 Arch St, Philadelphia, PA', distanceMeters: 800, rating: '3.8' },
+            { place_id: 'demo_4', name: 'Old City Parking', address: '215 Chestnut St, Philadelphia, PA', distanceMeters: 1200, rating: '4.5' },
+            { place_id: 'demo_5', name: 'South Street Lot', address: '500 South St, Philadelphia, PA', distanceMeters: 1500, rating: '3.9' }
+        ];
+
+        function showDemoSpots() {
+            parkingStatusElement.textContent = 'Showing demo parking spots (select one to test the payment flow). For live results, set up a Google Places API key with billing enabled.';
+            parkingListElement.innerHTML = '';
+            DEMO_SPOTS.forEach(function(spot) {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <div class="parking-item" data-place-id="${escapeAttr(spot.place_id)}" data-place-name="${escapeAttr(spot.name)}">
+                        <div class="parking-item-content">
+                            <strong>${escapeHtml(spot.name)}</strong>
+                            <span class="parking-item-address">${escapeHtml(spot.address)}</span>
+                            <span class="parking-item-meta">${formatDistance(spot.distanceMeters)} away · Rating ${spot.rating}</span>
+                            <button type="button" class="button book-now-btn">Select &amp; proceed to payment</button>
+                        </div>
+                    </div>
+                `;
+                parkingListElement.appendChild(listItem);
+            });
+            document.getElementById('parking-list-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            parkingListElement.querySelectorAll('.book-now-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const item = this.closest('.parking-item');
+                    if (item) selectReservation(item.dataset.placeId, item.dataset.placeName);
+                });
+            });
+        }
+
         // Function to find parking
         function findParking() {
             const location = document.getElementById('location').value;
@@ -99,35 +137,49 @@
                 return;
             }
 
-            // Clear previous results
+            // Clear previous results and show list section
             parkingListElement.innerHTML = '';
-            parkingListElement.style.display = 'block';
+            document.getElementById('parking-list-section').style.display = 'block';
             reservationFormElement.style.display = 'none';
             parkingStatusElement.textContent = 'Searching nearby parking spots...';
             clearMarkers();
 
-            // Geocode location input to get coordinates
+            // If Google Maps API didn't load (e.g. invalid key), show demo spots
+            if (typeof google === 'undefined' || !google.maps || !google.maps.Geocoder) {
+                parkingStatusElement.textContent = 'Maps API not available. Showing demo spots so you can test the flow.';
+                showDemoSpots();
+                return;
+            }
+
             const geocoder = new google.maps.Geocoder();
             geocoder.geocode({ address: location }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    // Center map on the first result
-                    map.setCenter(results[0].geometry.location);
-                    searchCenter = results[0].geometry.location;
-
-                    // Use the Places API to find nearby parking spots
-                    const request = {
-                        location: results[0].geometry.location,
-                        radius: 2000, // Search within 2 km
-                        type: ['parking']
-                    };
-
-                    // Instantiate the Places service and call the nearby search
-                    service = new google.maps.places.PlacesService(map);
-                    service.nearbySearch(request, displayResults);
-                } else {
-                    parkingStatusElement.textContent = '';
-                    alert("Could not find location: " + status);
+                if (status !== 'OK' || !results[0]) {
+                    parkingStatusElement.textContent = 'Could not find that location. Showing demo spots so you can still test the payment flow.';
+                    showDemoSpots();
+                    return;
                 }
+
+                map.setCenter(results[0].geometry.location);
+                searchCenter = results[0].geometry.location;
+                service = new google.maps.places.PlacesService(map);
+                service.nearbySearch({
+                    location: results[0].geometry.location,
+                    radius: 2000,
+                    type: 'parking'
+                }, function(results, status) {
+                    if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+                        displayResults(results, status);
+                    } else {
+                        service.textSearch({ query: 'parking near ' + location }, function(fallbackResults, fallbackStatus) {
+                            if (fallbackStatus === google.maps.places.PlacesServiceStatus.OK && fallbackResults && fallbackResults.length > 0) {
+                                displayResults(fallbackResults, fallbackStatus);
+                            } else {
+                                parkingStatusElement.textContent = 'No live results for this area. Showing demo spots so you can test selecting a spot and payment.';
+                                showDemoSpots();
+                            }
+                        });
+                    }
+                });
             });
         }
 
@@ -157,7 +209,7 @@
                 return;
             }
 
-            parkingStatusElement.textContent = `Showing top ${rankedResults.length} closest parking spots.`;
+            parkingStatusElement.textContent = `Showing ${rankedResults.length} parking spots — select one and proceed to payment.`;
 
             rankedResults.forEach(({ place, distanceMeters }) => {
                 const marker = new google.maps.Marker({
@@ -167,23 +219,52 @@
                 });
                 markers.push(marker);
 
-                const photoUrl = place.photos ? place.photos[0].getUrl({ maxWidth: 100, maxHeight: 100 }) : '';
+                const photoUrl = place.photos ? place.photos[0].getUrl({ maxWidth: 400, maxHeight: 200 }) : '';
+                const name = escapeHtml(place.name);
+                const address = escapeHtml(place.vicinity || place.formatted_address || 'Address unavailable');
 
                 const listItem = document.createElement('li');
-                let bookNowButton = `<button class="button" onclick="selectReservation('${place.place_id}', '${place.name}')">Book Now</button>`;
-
                 listItem.innerHTML = `
-                    <div class="parking-item">
-                        ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}">` : ''}
-                        <strong>${place.name}</strong><br>
-                        ${place.vicinity || place.formatted_address || 'Address unavailable'}<br>
-                        Distance: ${formatDistance(distanceMeters)}<br>
-                        Rating: ${place.rating || 'N/A'}<br>
-                        ${bookNowButton}
+                    <div class="parking-item" data-place-id="${escapeAttr(place.place_id)}" data-place-name="${escapeAttr(place.name)}">
+                        ${photoUrl ? `<img src="${photoUrl}" alt="${name}">` : ''}
+                        <div class="parking-item-content">
+                            <strong>${name}</strong>
+                            <span class="parking-item-address">${address}</span>
+                            <span class="parking-item-meta">${formatDistance(distanceMeters)} away · Rating ${place.rating || 'N/A'}</span>
+                            <button type="button" class="button book-now-btn">Select &amp; proceed to payment</button>
+                        </div>
                     </div>
                 `;
                 parkingListElement.appendChild(listItem);
             });
+
+            // Scroll list into view so user sees results
+            document.getElementById('parking-list-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Delegated click for "Select & proceed to payment"
+            parkingListElement.querySelectorAll('.book-now-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const item = this.closest('.parking-item');
+                    if (item) {
+                        selectReservation(item.dataset.placeId, item.dataset.placeName);
+                    }
+                });
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function escapeAttr(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
 
         function formatDistance(distanceMeters) {
@@ -216,12 +297,20 @@
 
         // Function to show the reservation form and store the selected parking spot
         function selectReservation(placeId, name) {
-            // Store the selected parking spot's place ID and name
             document.getElementById('parkingSpotId').value = placeId;
-            reservationFormElement.style.display = 'block'; // Show reservation form
-            parkingListElement.style.display = 'none'; // Hide the parking list
-            parkingStatusElement.textContent = `Selected: ${name}`;
+            document.getElementById('selected-spot-name').textContent = name;
+            document.getElementById('parking-list-section').style.display = 'none';
+            reservationFormElement.style.display = 'block';
+            reservationFormElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
+        // Change spot: show list again, hide reservation form
+        document.getElementById('change-spot-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            reservationFormElement.style.display = 'none';
+            document.getElementById('parking-list-section').style.display = 'block';
+            document.getElementById('parking-list-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
 
         // Handle reservation form submission
         document.getElementById('reservationDetailsForm').addEventListener('submit', function(event) {
@@ -244,26 +333,21 @@
                 },
                 body: JSON.stringify({ spotId: parkingSpotId, reservationTime: reservationTime })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to communicate with the backend');
-                }
-
-                return response.json();
-                
-            })
+            .then(response => response.json())
             .then(data => {
-                // Check if backend response contains the checkoutUrl
                 if (data.checkoutUrl) {
-                    // Redirect to the Stripe Checkout page
                     window.location.href = data.checkoutUrl;
+                } else if (data.error === 'User not logged in') {
+                    if (confirm('You need to log in to proceed to payment. Go to login now?')) {
+                        window.location.href = '/pages_php/login.php?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+                    }
                 } else {
-                    alert('Error creating payment session');
+                    alert(data.error || 'Error creating payment session. Please try again.');
                 }
             })
-            .catch(error =>{
+            .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while processing your payment');
+                alert('An error occurred while processing your payment. Please check your connection and try again.');
             });
         });
 

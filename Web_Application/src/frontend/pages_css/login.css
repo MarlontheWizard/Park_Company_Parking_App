@@ -1,30 +1,50 @@
-/* Google Fonts - Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+/* Auth pages – uses design system tokens from style.css */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-bg: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-accent: #ea580c;
+  --color-accent-hover: #c2410c;
+  --color-border: #e2e8f0;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --transition: 0.2s ease;
+}
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-sans);
 }
 
-.container {
-  height: 100vh;
-  width: 100%;
+body {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #4070f4;
-  column-gap: 30px;
+  background: linear-gradient(165deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  padding: 24px;
+}
+
+.container.forms {
+  width: 100%;
+  max-width: 440px;
 }
 
 .form {
-  position: absolute;
-  max-width: 430px;
+  position: relative;
   width: 100%;
-  padding: 30px;
-  border-radius: 6px;
-  background: #FFF;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
 }
 
 .form.signup {
@@ -42,23 +62,24 @@
   pointer-events: none;
 }
 
-header {
-  font-size: 28px;
-  font-weight: 600;
-  color: #232836;
+.form header {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
   text-align: center;
+  margin-bottom: 8px;
 }
 
 form {
-  margin-top: 30px;
+  margin-top: 24px;
 }
 
 .form .field {
   position: relative;
-  height: 50px;
+  height: 52px;
   width: 100%;
-  margin-top: 20px;
-  border-radius: 6px;
+  margin-top: 18px;
+  border-radius: var(--radius-md);
 }
 
 .field input,
@@ -66,57 +87,64 @@ form {
   height: 100%;
   width: 100%;
   border: none;
-  font-size: 16px;
-  font-weight: 400;
-  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
 }
 
 .field input {
   outline: none;
-  padding: 0 15px;
-  border: 1px solid#CACACA;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .field input:focus {
-  border-bottom-width: 2px;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
 .eye-icon {
   position: absolute;
   top: 50%;
-  right: 10px;
+  right: 14px;
   transform: translateY(-50%);
-  font-size: 18px;
-  color: #8b8b8b;
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
   cursor: pointer;
-  padding: 5px;
+  padding: 4px;
 }
 
 .field button {
   color: #fff;
-  background-color: #0171d3;
-  transition: all 0.3s ease;
+  background: var(--color-accent);
   cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  margin-top: 8px;
 }
 
 .field button:hover {
-  background-color: #016dcb;
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
 }
 
 .form-link {
   text-align: center;
-  margin-top: 10px;
+  margin-top: 16px;
 }
 
 .form-link span,
 .form-link a {
-  font-size: 14px;
-  font-weight: 400;
-  color: #232836;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
 }
 
 .form a {
-  color: #0171d3;
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -124,12 +152,21 @@ form {
   text-decoration: underline;
 }
 
+.error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border-radius: var(--radius-md);
+}
+
 .line {
-  position: relative;
   height: 1px;
   width: 100%;
-  margin: 36px 0;
-  background-color: #d4d4d4;
+  margin: 28px 0;
+  background: var(--color-border);
+  position: relative;
 }
 
 .line::before {
@@ -138,61 +175,44 @@ form {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #FFF;
-  color: #8b8b8b;
-  padding: 0 15px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  padding: 0 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .media-options a {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: border-color var(--transition), background var(--transition);
 }
 
-a.facebook {
-  color: #fff;
-  background-color: #4267b2;
-}
-
-a.facebook .facebook-icon {
-  height: 28px;
-  width: 28px;
-  color: #0171d3;
-  font-size: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
-}
-
-.facebook-icon,
-img.google-img {
-  position: absolute;
-  top: 50%;
-  left: 15px;
-  transform: translateY(-50%);
+.media-options a:hover {
+  border-color: var(--color-accent);
+  background: rgba(234, 88, 12, 0.06);
 }
 
 img.google-img {
   height: 20px;
   width: 20px;
-  object-fit: cover;
-}
-
-a.google {
-  border: 1px solid #CACACA;
+  object-fit: contain;
 }
 
 a.google span {
-  font-weight: 500;
-  opacity: 0.6;
-  color: #232836;
+  opacity: 0.9;
 }
 
-@media screen and (max-width: 400px) {
+@media (max-width: 480px) {
   .form {
-    padding: 20px 10px;
+    padding: 24px 20px;
   }
-
 }

@@ -109,49 +109,32 @@ if ($session_id) {
                         <title>Payment Successful</title>
                         <link rel="stylesheet" href="/pages_css/style.css">
                         <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                                background-color: #f4f4f9;
-                                text-align: center;
-                                padding: 50px;
-                            }
-                    
-                            h1 {
-                                color: #28a745;
-                            }
-                    
+                            body { text-align: center; padding: 48px 24px; }
+                            .success-page h1 { color: #059669; font-size: 1.75rem; margin-bottom: 16px; }
                             .success-message {
-                                background-color: #28a745;
-                                color: white;
-                                padding: 20px;
-                                margin: 20px 0;
-                                border-radius: 5px;
+                                background: #ecfdf5;
+                                color: #065f46;
+                                padding: 20px 24px;
+                                margin: 24px auto;
+                                border-radius: 10px;
+                                max-width: 480px;
+                                border: 1px solid #a7f3d0;
                             }
-                    
                             .details {
-                                background-color: #f8f9fa;
-                                padding: 20px;
-                                border: 1px solid #ddd;
-                                border-radius: 5px;
-                                margin-top: 20px;
+                                background: #fff;
+                                padding: 24px;
+                                border: 1px solid #e2e8f0;
+                                border-radius: 14px;
+                                margin: 24px auto;
+                                max-width: 480px;
+                                text-align: left;
                             }
-                    
-                            .button {
-                                background-color: #007bff;
-                                color: white;
-                                padding: 10px 20px;
-                                border: none;
-                                border-radius: 5px;
-                                text-decoration: none;
-                                display: inline-block;
-                            }
-                    
-                            .button:hover {
-                                background-color: #0056b3;
-                            }
+                            .details h2 { font-size: 1.125rem; margin-bottom: 12px; color: #0f172a; }
+                            .details p { margin: 8px 0; color: #64748b; }
+                            .details strong { color: #0f172a; }
                         </style>
                     </head>
-                    <body>
+                    <body class="success-page">
                     
                         <h1>Payment Successful!</h1>
                     
