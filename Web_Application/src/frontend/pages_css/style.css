@@ -140,8 +140,9 @@ body {
   min-height: calc(100vh - 72px);
   text-align: center;
   padding: 48px 24px;
-  background: linear-gradient(165deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-  background-image: linear-gradient(rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.88) 100%),
+  /* Background image at 60% opacity (40% dark overlay) so the image is visible */
+  background: #0f172a;
+  background-image: linear-gradient(rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%),
     url('../images/parking-bg.jpg');
   background-size: cover;
   background-position: center;
