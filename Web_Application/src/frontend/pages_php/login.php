@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$user) {
             $error_message = "No account found with this email. Please check your email or sign up.";
             CloseConn($mysqli);
-            include '../pages_html/login.html';
+            include __DIR__ . '/../pages_html/login.html';
             exit();
         }
         
@@ -63,5 +63,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 
-include '../pages_html/login.html'; 
+include __DIR__ . '/../pages_html/login.html'; 
 ?>

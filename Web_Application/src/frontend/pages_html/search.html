@@ -37,6 +37,7 @@
         <!-- Parking Spots List -->
         <section class="parking-list">
             <h2>Parking Spots</h2>
+            <p id="parking-status"></p>
             <ul id="parking-list">
                 <!-- List of parking spots will be populated here -->
             </ul>
@@ -58,6 +59,9 @@
         let map;
         let service;
         let markers = [];
+        const parkingListElement = document.getElementById('parking-list');
+        const parkingStatusElement = document.getElementById('parking-status');
+        const reservationFormElement = document.getElementById('reservation-form');
 
         // Initialize the map
         function initMap() {
@@ -95,7 +99,10 @@
             }
 
             // Clear previous results
-            document.getElementById('parking-list').innerHTML = '';
+            parkingListElement.innerHTML = '';
+            parkingListElement.style.display = 'block';
+            reservationFormElement.style.display = 'none';
+            parkingStatusElement.textContent = 'Searching nearby parking spots...';
             clearMarkers();
 
             // Geocode location input to get coordinates
@@ -116,43 +123,59 @@
                     service = new google.maps.places.PlacesService(map);
                     service.nearbySearch(request, displayResults);
                 } else {
+                    parkingStatusElement.textContent = '';
                     alert("Could not find location: " + status);
                 }
+            });
+        }
+
+        function renderParkingResults(results) {
+            if (!results || results.length === 0) {
+                parkingStatusElement.textContent = 'No parking spots found for this location. Try a nearby city or landmark.';
+                return;
+            }
+
+            parkingStatusElement.textContent = `Found ${results.length} parking spots.`;
+
+            results.forEach((place) => {
+                const marker = new google.maps.Marker({
+                    map: map,
+                    position: place.geometry.location,
+                    title: place.name
+                });
+                markers.push(marker);
+
+                const photoUrl = place.photos ? place.photos[0].getUrl({ maxWidth: 100, maxHeight: 100 }) : '';
+
+                const listItem = document.createElement('li');
+                let bookNowButton = `<button class="button" onclick="selectReservation('${place.place_id}', '${place.name}')">Book Now</button>`;
+
+                listItem.innerHTML = `
+                    <div class="parking-item">
+                        ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}">` : ''}
+                        <strong>${place.name}</strong><br>
+                        ${place.vicinity || place.formatted_address || 'Address unavailable'}<br>
+                        Rating: ${place.rating || 'N/A'}<br>
+                        ${bookNowButton}
+                    </div>
+                `;
+                parkingListElement.appendChild(listItem);
             });
         }
 
         // Function to display results
         function displayResults(results, status) {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                results.forEach((place) => {
-                    // Create a marker for each parking spot
-                    const marker = new google.maps.Marker({
-                        map: map,
-                        position: place.geometry.location,
-                        title: place.name
-                    });
-                    markers.push(marker);
-
-                    // Fetch the parking spot photo (if available)
-                    const photoUrl = place.photos ? place.photos[0].getUrl({ maxWidth: 100, maxHeight: 100 }) : '';
-
-                    // Create a list item for each parking spot
-                    const listItem = document.createElement('li');
-                    let bookNowButton = `<button class="button" onclick="selectReservation('${place.place_id}', '${place.name}')">Book Now</button>`;
-
-                    listItem.innerHTML = `
-                        <div class="parking-item">
-                            ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}">` : ''}
-                            <strong>${place.name}</strong><br>
-                            ${place.vicinity}<br>
-                            Rating: ${place.rating || 'N/A'}<br>
-                            ${bookNowButton}
-                        </div>
-                    `;
-                    document.getElementById('parking-list').appendChild(listItem);
-                });
+                renderParkingResults(results);
             } else {
-                alert("No parking spots found nearby.");
+                service.textSearch({ query: `parking near ${document.getElementById('location').value}` }, (fallbackResults, fallbackStatus) => {
+                    if (fallbackStatus === google.maps.places.PlacesServiceStatus.OK) {
+                        renderParkingResults(fallbackResults);
+                        return;
+                    }
+
+                    parkingStatusElement.textContent = 'No parking spots found for this location. Try a nearby city or landmark.';
+                });
             }
         }
 
@@ -160,8 +183,9 @@
         function selectReservation(placeId, name) {
             // Store the selected parking spot's place ID and name
             document.getElementById('parkingSpotId').value = placeId;
-            document.getElementById('reservation-form').style.display = 'block'; // Show reservation form
-            document.getElementById('parking-list').style.display = 'none'; // Hide the parking list
+            reservationFormElement.style.display = 'block'; // Show reservation form
+            parkingListElement.style.display = 'none'; // Hide the parking list
+            parkingStatusElement.textContent = `Selected: ${name}`;
         }
 
         // Handle reservation form submission

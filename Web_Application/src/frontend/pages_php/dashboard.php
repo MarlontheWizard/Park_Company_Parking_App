@@ -1,8 +1,8 @@
 <?php
 require_once '/var/www/html/vendor/autoload.php';
-require_once '/var/www/html/web_application/src/backend/database/handle_connection.php';
+require_once '/var/www/html/Web_Application/src/backend/database/handle_connection.php';
 
-include 'header_visibility.php';  
+include __DIR__ . '/header_visibility.php';  
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start(); 
@@ -22,5 +22,5 @@ if (!isset($_SESSION['user'])) {
 }
 
 
-include '../pages_html/dashboard.html';
+include __DIR__ . '/../pages_html/dashboard.html';
 ?>

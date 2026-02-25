@@ -71,5 +71,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Include the registration form if errors are present
-include '../pages_html/registration.html';
+include __DIR__ . '/../pages_html/registration.html';
 ?>
